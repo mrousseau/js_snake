@@ -13,10 +13,12 @@ window.onload = function()
     var yCoord = 0; 
 
     var snakee; 
-    var apple; 
-
+    var apple ; 
+    var listApple =  []; 
     var appleTime = 0; 
 
+    var widthInBlocks = canvasWidth / blockSize;
+    var heightInBlocks = canvasHeith / blockSize;
     init();
 
     function init()
@@ -28,29 +30,54 @@ window.onload = function()
         document.body.appendChild(canvas);
         ctx = canvas.getContext('2d');
         snakee = new Snake([[6,4], [5,4], [4,4]], "right");
+
         refreshCanvas();
     }
 
 
     function refreshCanvas()
     {
-        ctx.clearRect(0,0, canvas.width,canvas.height);
         snakee.adavance();
-        snakee.draw();
 
-        if (appleTime === 10)
+        if(snakee.checkCollision())
         {
-            console.log("10 -----> now ");
-            apple = new Apple();
-            apple.draw();
-            appleTime = 0; 
-        }
-        else 
-        {
-            appleTime++;
-        }
 
-        setTimeout(refreshCanvas, delay);
+        }
+        else
+        {
+            ctx.clearRect(0,0, canvas.width,canvas.height);
+        
+            snakee.draw();
+    
+            if (appleTime === 10000)
+            {
+                console.log("10 -----> now ");
+                apple = new Apple();
+                listApple.push(apple);
+                appleTime = 0; 
+            }
+            else 
+            {
+                appleTime += delay;
+            }
+    
+            console.log("before apple")
+            console.log("Arrray apple lenght" + listApple.length);
+            if(listApple.length > 0  )
+            {
+                console.log("supp O");
+                for(var idx = 0; idx < listApple.length; idx++)
+                {
+                    var oApple = listApple[idx];
+                    console.log("draw apple");
+                    oApple.draw();
+                }
+        
+            }
+    
+            setTimeout(refreshCanvas, delay);
+        }
+        
     }
 
     function drawBlock(ctx, position)
@@ -124,6 +151,38 @@ window.onload = function()
             {
                 this.direction = newDirection;
             }
+
+        };
+
+        this.checkCollision = function()
+        {
+          var wallCollision =  false; 
+          var snakeCollision = false;   
+          var head = this.body[0];
+          var rest = this.body.slice(1);
+          var snakeX = head[0];
+          var snakeY = head[1]; 
+          var minimumX = 0; 
+          var minimumY = 0;
+          var maxX = widthInBlocks -1;
+          var maxY = heightInBlocks -1;
+          var isNotBetweenNHorizonWalls = snakeX < minimumX || snakeX > maxX; 
+          var isNotBetwennVerticalWalls = snakeY < minimumY || snakeY > maxY;
+
+          if(isNotBetweenNHorizonWalls || isNotBetwennVerticalWalls )
+          {
+              wallCollision = true; 
+          }
+
+          for(var i = 0; i< rest.length ; i++)
+          {
+              if(snakeX === rest[i][0] && snakeY === rest[i][1])
+              {
+                    snakeCollision = true; 
+              }
+          }
+          return wallCollision || snakeCollision; 
+
 
         };
     }
